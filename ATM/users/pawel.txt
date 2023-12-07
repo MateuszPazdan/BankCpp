@@ -1,0 +1,7 @@
+4.000000
+wplata 32
+wplata 32
+wplata 12
+wplata 32132
+wyplata 32208
+wplata 4

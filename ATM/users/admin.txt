@@ -1,0 +1,14 @@
+467.690000
+wplata 1
+wplata 19.5
+wyplata 11
+wyplata 3.21
+wplata 0.4
+wplata 321
+wplata 2
+wplata 32
+wplata 31
+wplata 10
+wplata 11
+wplata 31
+wplata 23
