@@ -18,18 +18,15 @@ bool Atm::withdrawBills(int amount, std::unordered_map<int, int>& withdrawnBills
     return amount == 0;
 }
 
-bool Atm::withdrawCash(int amount)
+std::unordered_map<int, int> Atm::withdrawCash(int amount)
 {
     std::unordered_map<int, int> withdrawnBills;
     if (withdrawBills(amount, withdrawnBills)) {
-        std::cout << "Wydane banknoty:" << std::endl;
-        for (const auto& para : withdrawnBills) {
-            std::cout << para.second << " x " << para.first << std::endl;
-        }
-        return true;
+        
+        return withdrawnBills;
     }
     else {
-        return false;
+        return std::unordered_map<int, int>();
     }
 }
 

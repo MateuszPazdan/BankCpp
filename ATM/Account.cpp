@@ -125,6 +125,7 @@ bool Account::updateBalance(double newBalance)
 			file << line << '\n';
 		}
 		file.close();
+		this->setBalance(newBalance);
 		return true;
 	}
 	else {
