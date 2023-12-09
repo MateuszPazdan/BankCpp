@@ -1,8 +1,10 @@
 #pragma once
 #include "Account.h"	
+#include "Atm.h"
 #include <wx/wx.h>
 #include <wx/listctrl.h>
 #include <string>
+#include <unordered_map>
 
 class MainFrame : public wxFrame
 {
@@ -14,11 +16,15 @@ private:
 	std::string stdPassword = "";
 	Account stdAccount = Account(stdLogin, 0.0, stdPassword);
 
+	std::unordered_map<int, int> availableBills = { {500, 5}, {200, 10}, {100, 20}, {50, 50}, {20, 100}, {10, 200} };
+	Atm atm = Atm(availableBills);
+
 	void CreateControls();
 	void BindHomeEventHandlers();
 	void BindLoginEventHandlers();
 	void BindRegisterEventHandlers();
 	void BindMenuEventHandlers();
+	void BindAtmEventHandlers();
 
 	void ShowRegisterPanel(wxCommandEvent& event);
 	void ShowLoginPanel(wxCommandEvent& event);
@@ -26,11 +32,15 @@ private:
 	void ShowDepositMenu(wxCommandEvent& event);
 	void ShowWithdrawMenu(wxCommandEvent& event);
 	void HideDepWitMenu(wxCommandEvent& event);
+	void AtmReport(wxCommandEvent& event);
+	void AtmClose(wxCommandEvent& event);
+	void AtmOpen(wxCommandEvent& event);
 	void ClearInputs();
 	void ClearDepWitInputs();
 	void ShowHisory();
 	void ClearHistory();
 	bool isCurrencyAmount(const std::string& input);
+	bool isCurrencyAtm(const std::string& input);
 	bool isLoginPassword(const std::string& input);
 
 	void createAccount(wxCommandEvent& event);
@@ -71,11 +81,21 @@ private:
 	wxButton* withdrawBtn;
 
 	wxStaticText* menuInfo;
-	wxTextCtrl* depositAmount;
+	wxTextCtrl* AmountWindow;
 	wxButton* depositAcceptBtn;
 	wxTextCtrl* withdrawAmount;
 	wxButton* withdrawAcceptBtn;
 	wxButton* backBtn;
 	wxListCtrl* transactionList;
 	wxButton* logoutBtn;
+	wxButton* atmBtn;
+
+	//atm
+	wxPanel* atmPanel;
+	wxButton* amountOfBillsBtn;
+
+	wxTextCtrl* atmInput;
+	wxButton* atmWithdrawBtn;
+
+	wxButton* atmBackBtn;
 };

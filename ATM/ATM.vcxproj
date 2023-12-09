@@ -133,12 +133,14 @@
   <ItemGroup>
     <ClInclude Include="Account.h" />
     <ClInclude Include="App.h" />
+    <ClInclude Include="Atm.h" />
     <ClInclude Include="MainFrame.h" />
     <ClInclude Include="Transaction.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Account.cpp" />
     <ClCompile Include="App.cpp" />
+    <ClCompile Include="Atm.cpp" />
     <ClCompile Include="MainFrame.cpp" />
     <ClCompile Include="Transaction.cpp" />
   </ItemGroup>

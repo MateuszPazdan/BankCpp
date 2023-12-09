@@ -15,6 +15,7 @@ MainFrame::MainFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title)
 	BindLoginEventHandlers();
 	BindRegisterEventHandlers();
 	BindMenuEventHandlers();
+	BindAtmEventHandlers();
 }
 
 void MainFrame::CreateControls()
@@ -72,18 +73,17 @@ void MainFrame::CreateControls()
 	headlineMenuText->SetFont(headlineFont);
 
 	logoutBtn = new wxButton(menuPanel, wxID_ANY, "Wyloguj", wxPoint(10, 10), wxSize(80, -1));
+	atmBtn = new wxButton(menuPanel, wxID_ANY, "ATM", wxPoint(100, 10), wxSize(80, -1));
 	moneyBalance = new wxStaticText(menuPanel, wxID_ANY, "0", wxPoint(0, 100), wxSize(800, -1), wxALIGN_CENTER_HORIZONTAL);
 	depositBtn = new wxButton(menuPanel, wxID_ANY, "Wp³aæ", wxPoint(175, 150), wxSize(150, 50));
 	withdrawBtn = new wxButton(menuPanel, wxID_ANY, "Wyp³aæ", wxPoint(475, 150), wxSize(150, 50));
 
-	depositAmount = new wxTextCtrl(menuPanel, wxID_ANY, "0", wxPoint(225, 160), wxSize(150, -1));
+	AmountWindow = new wxTextCtrl(menuPanel, 1, "0", wxPoint(225, 160), wxSize(150, -1));
 	depositAcceptBtn = new wxButton(menuPanel, wxID_ANY, "Wp³aæ", wxPoint(425, 160), wxSize(150, -1));
-	depositAmount->Hide();
+	AmountWindow->Hide();
 	depositAcceptBtn->Hide();
 
-	withdrawAmount = new wxTextCtrl(menuPanel, wxID_ANY, "0", wxPoint(225, 160), wxSize(150, -1));
 	withdrawAcceptBtn = new wxButton(menuPanel, wxID_ANY, "Wyp³aæ", wxPoint(425, 160), wxSize(150, -1));
-	withdrawAmount->Hide();
 	withdrawAcceptBtn->Hide();
 	transactionList = new wxListCtrl(menuPanel, wxID_ANY, wxPoint(200, 300), wxSize(400, 300), wxLC_REPORT);
 	transactionList->InsertColumn(0, "Typ Transakcji", wxLIST_FORMAT_LEFT, 200);
@@ -91,9 +91,17 @@ void MainFrame::CreateControls()
 	backBtn = new wxButton(menuPanel, wxID_ANY, "<", wxPoint(100, 160), wxSize(50, -1));
 	backBtn->Hide();
 
+	//PANEL BANKOMATU
+	atmPanel = new wxPanel(this, wxID_ANY, wxPoint(0, 0), wxSize(800, 600));
+	amountOfBillsBtn = new wxButton(atmPanel, wxID_ANY, "Ile banknotow", wxPoint(10, 10), wxSize(150, 50));
+
+	AmountWindow = new wxTextCtrl(atmPanel, 2, "0", wxPoint(225, 160), wxSize(150, -1));
+	atmWithdrawBtn = new wxButton(atmPanel, wxID_ANY, "Wp³aæ", wxPoint(175, 250), wxSize(150, -1));
+	atmWithdrawBtn = new wxButton(atmPanel, wxID_ANY, "Wyp³aæ", wxPoint(475, 250), wxSize(150, -1));
+	atmBackBtn = new wxButton(atmPanel, wxID_ANY, "Wróæ", wxPoint(50, 500), wxSize(100, 50));
 
 	//ZARZADZANIE PANELAMI
-	//homePanel->Hide();
+	homePanel->Hide();
 	loginPanel->Hide();
 	registerPanel->Hide();
 	menuPanel->Hide();
@@ -126,6 +134,13 @@ void MainFrame::BindMenuEventHandlers()
 	withdrawAcceptBtn->Bind(wxEVT_BUTTON, &MainFrame::withdrawMoney, this);
 }
 
+void MainFrame::BindAtmEventHandlers()
+{
+	amountOfBillsBtn->Bind(wxEVT_BUTTON, &MainFrame::AtmReport, this);
+	atmBtn->Bind(wxEVT_BUTTON, &MainFrame::AtmOpen, this);
+	atmBackBtn->Bind(wxEVT_BUTTON, &MainFrame::AtmClose, this);
+}
+
 void MainFrame::ShowRegisterPanel(wxCommandEvent& event)
 {
 	homePanel->Hide();
@@ -146,12 +161,13 @@ void MainFrame::ShowHomePanel(wxCommandEvent& event)
 	ClearInputs();
 	loginPanel->Hide();
 	registerPanel->Hide();
+	atmPanel->Hide();
 }
 
 void MainFrame::ShowDepositMenu(wxCommandEvent& event)
 {
 	backBtn->Show();
-	depositAmount->Show();
+	AmountWindow->Show();
 	depositAcceptBtn->Show();
 	depositBtn->Hide();
 	withdrawBtn->Hide();
@@ -160,7 +176,7 @@ void MainFrame::ShowDepositMenu(wxCommandEvent& event)
 void MainFrame::ShowWithdrawMenu(wxCommandEvent& event)
 {
 	backBtn->Show();
-	withdrawAmount->Show();
+	AmountWindow->Show();
 	withdrawAcceptBtn->Show();
 	depositBtn->Hide();
 	withdrawBtn->Hide();
@@ -169,13 +185,35 @@ void MainFrame::ShowWithdrawMenu(wxCommandEvent& event)
 void MainFrame::HideDepWitMenu(wxCommandEvent& event)
 {
 	backBtn->Hide();
-	withdrawAmount->Hide();
 	withdrawAcceptBtn->Hide();
-	depositAmount->Hide();
+	AmountWindow->Hide();
 	depositAcceptBtn->Hide();
 	depositBtn->Show();
 	withdrawBtn->Show();
 	ClearDepWitInputs();
+}
+
+void MainFrame::AtmReport(wxCommandEvent& event)
+{
+	std::unordered_map<int, int> dostepneBanknoty = atm.getAvailableBills();
+	wxString message;
+	message += "Dostêpne banknoty w bankomacie:\n";
+	for (const auto& para : dostepneBanknoty) {
+		message += wxString::Format("%d z³ - %d\n", para.first, para.second);
+	}
+
+	wxMessageDialog dialog(this, message, "Dostêpne Banknoty", wxOK | wxICON_INFORMATION);
+	dialog.ShowModal();
+}
+
+void MainFrame::AtmClose(wxCommandEvent& event) {
+	menuPanel->Show();
+	atmPanel->Hide();
+}
+
+void MainFrame::AtmOpen(wxCommandEvent& event) {
+	menuPanel->Hide();
+	atmPanel->Show();
 }
 
 void MainFrame::ClearInputs()
@@ -189,8 +227,7 @@ void MainFrame::ClearInputs()
 
 void MainFrame::ClearDepWitInputs()
 {
-	withdrawAmount->SetValue("0");
-	depositAmount->SetValue("0");
+	AmountWindow->SetValue("0");
 }
 
 void MainFrame::ShowHisory()
@@ -211,9 +248,13 @@ void MainFrame::ClearHistory()
 	transactionList->DeleteAllItems();
 }
 
-bool MainFrame::isCurrencyAmount(const std::string& input)
-{
+bool MainFrame::isCurrencyAmount(const std::string& input){
 	std::regex pattern(R"(\d+\.\d{2}[0]*)");
+	return std::regex_match(input, pattern);
+}
+
+bool MainFrame::isCurrencyAtm(const std::string& input){
+	std::regex pattern("[1-9]+0+");
 	return std::regex_match(input, pattern);
 }
 
@@ -296,7 +337,7 @@ void MainFrame::loginAccount(wxCommandEvent& event)
 
 void MainFrame::depositMoney(wxCommandEvent& event)
 {
-	wxString amountToDepositStr = depositAmount->GetValue();
+	wxString amountToDepositStr = AmountWindow->GetValue();
 	double amountToDeposit;
 	if (amountToDepositStr.ToDouble(&amountToDeposit)) {
 		if (amountToDeposit <= 0) {
@@ -332,7 +373,7 @@ void MainFrame::depositMoney(wxCommandEvent& event)
 
 void MainFrame::withdrawMoney(wxCommandEvent& event)
 {
-	wxString amountToWithdrawStr = withdrawAmount->GetValue();
+	wxString amountToWithdrawStr = AmountWindow->GetValue();
 	double amountToWithdraw;
 	if (amountToWithdrawStr.ToDouble(&amountToWithdraw)) {
 		if (amountToWithdraw <= 0) {
@@ -379,4 +420,6 @@ void MainFrame::logout(wxCommandEvent& event)
 	menuPanel->Hide();
 	homePanel->Show();
 }
+
+
 
