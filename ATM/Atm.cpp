@@ -30,6 +30,13 @@ std::unordered_map<int, int> Atm::withdrawCash(int amount)
     }
 }
 
+void Atm::depositCash(const std::unordered_map<int, int>& depositedBills)
+{
+    for (const auto& pair : depositedBills) {
+        this->availableBills[pair.first] += pair.second;
+    }
+}
+
 void Atm::setAvailableBills(const std::unordered_map<int, int>& availableBills)
 {
     this->availableBills = availableBills;

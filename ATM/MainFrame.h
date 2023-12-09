@@ -8,7 +8,6 @@
 
 class MainFrame : public wxFrame
 {
-
 public:
 	MainFrame(const wxString& title);
 private:
@@ -97,6 +96,19 @@ private:
 	//atm
 	wxPanel* atmPanel;
 	wxButton* amountOfBillsBtn;
+	wxStaticText* fhInfo;
+	wxStaticText* thInfo;
+	wxStaticText* ohInfo;
+	wxStaticText* fInfo;
+	wxStaticText* twhInfo;
+	wxStaticText* teInfo;
+	wxTextCtrl* fhAtm;
+	wxTextCtrl* thAtm;
+	wxTextCtrl* ohAtm;
+	wxTextCtrl* fAtm;
+	wxTextCtrl* twAtm;
+	wxTextCtrl* teAtm;
+
 	wxTextCtrl* AmountWindowAtm;
 	wxButton* atmDepositBtn;
 	wxButton* atmWithdrawBtn;

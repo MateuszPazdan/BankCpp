@@ -1,4 +1,4 @@
-395.500000
+103400.500000
 wplata 1
 wplata 19.5
 wyplata 11
@@ -35,3 +35,34 @@ wplata 15
 wyplata 15
 wplata 2
 wyplata 10
+wyplata 300
+wplata 90000
+wyplata 250
+wyplata 200
+wyplata 600
+wyplata 45
+wyplata 50
+wyplata 50
+wplata 100
+wyplata 50
+wyplata 950
+wyplata 20
+wplata 20
+wplata 3550
+wplata 3530
+wplata 880
+wplata 500
+wplata 200
+wplata 100
+wplata 50
+wplata 20
+wplata 10
+wplata 880
+wplata 6000
+wplata 880
+wyplata 10
+wyplata 150
+wyplata 890
+wplata 50
+wyplata 100
+wyplata 100
