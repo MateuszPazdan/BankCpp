@@ -12,6 +12,7 @@ public:
 private:
 	std::string stdLogin = "";
 	std::string stdPassword = "";
+	int selectedItemIndex = -1;
 	Account stdAccount = Account(stdLogin, 0.0, stdPassword);
 
 	// BINDS
@@ -20,6 +21,7 @@ private:
 	void BindLoginEventHandlers();
 	void BindRegisterEventHandlers();
 	void BindMenuEventHandlers();
+	void BindAdminMenuEventHandlers();
 	// ACCOUNT
 	void ShowRegisterPanel(wxCommandEvent& event);
 	void ShowLoginPanel(wxCommandEvent& event);
@@ -30,7 +32,7 @@ private:
 	void ClearInputs();
 	void ClearDepWitInputs();
 	void ShowTransactionsHisory();
-	void ClearHistory();
+	void ClearTransationsHistory();
 	bool isCurrencyAmount(const std::string& input);
 	bool isLoginPassword(const std::string& input);
 	void createAccount(wxCommandEvent& event);
@@ -38,6 +40,13 @@ private:
 	void depositMoney(wxCommandEvent& event);
 	void withdrawMoney(wxCommandEvent& event);
 	void logout(wxCommandEvent& event);
+
+	void selectUser(wxListEvent& event);
+	void editUser(wxCommandEvent& event);
+	void deleteUser(wxCommandEvent& event);
+
+	void ShowUsersHisory();
+	void ClearUsersHistory();
 
 	wxStaticText* headlineText;
 	
@@ -81,8 +90,10 @@ private:
 
 	//admin menu
 	wxPanel* adminMenuPanel;
-
+	wxStaticText* headlineAdminMenuText;
+	wxButton* adminLogoutBtn;
 
 	wxListCtrl* usersList;
-	wxButton* adminLogoutBtn;
+	wxButton* deleteBtn;
+	wxButton* editBtn;
 };

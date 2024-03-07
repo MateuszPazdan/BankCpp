@@ -8,6 +8,7 @@
 #include "Account.h"
 #include "Transaction.h"
 
+
 MainFrame::MainFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title)
 {
 	CreateControls();
@@ -15,6 +16,7 @@ MainFrame::MainFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title)
 	BindLoginEventHandlers();
 	BindRegisterEventHandlers();
 	BindMenuEventHandlers();
+	BindAdminMenuEventHandlers();
 }
 
 void MainFrame::CreateControls()
@@ -91,13 +93,24 @@ void MainFrame::CreateControls()
 
 	//ADMIN PANEL
 	adminMenuPanel = new wxPanel(this, wxID_ANY, wxPoint(0, 0), wxSize(800, 600));
-	adminLogoutBtn = new wxButton(adminMenuPanel, wxID_ANY, "Wyloguj", wxPoint(10, 10), wxSize(80, -1));
+	adminLogoutBtn = new wxButton(adminMenuPanel, wxID_ANY, "Wyloguj", wxPoint(10, 10), wxSize(100, -1));
+	headlineAdminMenuText = new wxStaticText(adminMenuPanel, wxID_ANY, "Admin Panel", wxPoint(0, 40), wxSize(800, -1), wxALIGN_CENTER_HORIZONTAL);
+	adminMenuPanel->SetFont(mainFont);
+	headlineAdminMenuText->SetFont(headlineFont);
 
-	//homePanel->Hide();
+	
+	usersList = new wxListCtrl(adminMenuPanel, wxID_ANY, wxPoint(220, 150), wxSize(400, 450), wxLC_REPORT);
+	usersList->InsertColumn(0, "Login", wxLIST_FORMAT_LEFT, 200);
+	usersList->InsertColumn(1, "Balans", wxLIST_FORMAT_LEFT, 200);
+	editBtn = new wxButton(adminMenuPanel, wxID_ANY, "Edytuj", wxPoint(635, 150), wxSize(150, 50));
+	deleteBtn = new wxButton(adminMenuPanel, wxID_ANY, "Usuñ", wxPoint(635, 210), wxSize(150, 50));
+
+
+	homePanel->Hide();
 	loginPanel->Hide();
 	registerPanel->Hide();
 	menuPanel->Hide();
-	adminMenuPanel->Hide();
+	//adminMenuPanel->Hide();
 
 }
 
@@ -129,8 +142,63 @@ void MainFrame::BindMenuEventHandlers()
 	withdrawAcceptBtn->Bind(wxEVT_BUTTON, &MainFrame::withdrawMoney, this);
 }
 
+void MainFrame::BindAdminMenuEventHandlers()
+{
+	adminLogoutBtn->Bind(wxEVT_BUTTON, &MainFrame::logout, this);
+	usersList->Bind(wxEVT_LIST_ITEM_SELECTED, &MainFrame::selectUser, this);
+	editBtn->Bind(wxEVT_BUTTON, &MainFrame::editUser, this);
+	deleteBtn->Bind(wxEVT_BUTTON, &MainFrame::deleteUser, this);
+}
 // BINDS____END
 
+
+void MainFrame::selectUser(wxListEvent& event)
+{
+	selectedItemIndex = event.GetIndex();
+	
+}
+
+void MainFrame::editUser(wxCommandEvent& event)
+{
+
+	if (selectedItemIndex != -1) {
+	
+		wxMessageBox("edit" + std::to_string(selectedItemIndex));
+		ClearUsersHistory();
+		ShowUsersHisory();
+		selectedItemIndex = -1;
+	}
+}
+
+void MainFrame::deleteUser(wxCommandEvent& event)
+{
+	if (selectedItemIndex != -1) {
+		wxMessageBox("delete" + std::to_string(selectedItemIndex));
+		ClearUsersHistory();
+		ShowUsersHisory();
+		selectedItemIndex = -1;
+	}
+}
+
+void MainFrame::ShowUsersHisory()
+{
+	std::vector<Account> users = stdAccount.returnVectorOfAccounts();
+	for ( auto& user : users) {
+		if (user.getRole() == "admin") continue;
+		long index = usersList->InsertItem(usersList->GetItemCount(), user.getLogin());
+		usersList->SetItem(index, 1, wxString::Format("%.2f", user.getBalance()));
+	}
+}
+
+void MainFrame::ClearUsersHistory()
+{
+	usersList->DeleteAllItems();
+}
+
+void MainFrame::ClearTransationsHistory()
+{
+	transactionList->DeleteAllItems();
+}
 
 // ACCOUNT_MANAGEMENT
 void MainFrame::ShowRegisterPanel(wxCommandEvent& event)
@@ -209,10 +277,7 @@ void MainFrame::ShowTransactionsHisory()
 	}
 }
 
-void MainFrame::ClearHistory()
-{
-	transactionList->DeleteAllItems();
-}
+
 
 bool MainFrame::isCurrencyAmount(const std::string& input){
 	std::regex pattern(R"(\d+\.\d{2}[0]*)");
@@ -290,8 +355,11 @@ void MainFrame::loginAccount(wxCommandEvent& event)
 			menuPanel->Show();
 		}
 		if (stdAccount.getRole() == "admin") {
-
+			ShowUsersHisory();
+			loginPanel->Hide();
+			adminMenuPanel->Show();
 		}
+
 	}
 	else {
 		wxMessageBox("Nieprawid³owe dane");
@@ -328,7 +396,7 @@ void MainFrame::depositMoney(wxCommandEvent& event)
 	moneyBalance->SetLabel(updatedBalanceStr);
 	ClearDepWitInputs();
 	HideDepWitMenu(event);
-	ClearHistory();
+	ClearTransationsHistory();
 	ShowTransactionsHisory();
 }
 
@@ -368,21 +436,28 @@ void MainFrame::withdrawMoney(wxCommandEvent& event)
 	
 	ClearDepWitInputs();
 	HideDepWitMenu(event);
-	ClearHistory();
+	ClearTransationsHistory();
 	ShowTransactionsHisory();
 }
 
 void MainFrame::logout(wxCommandEvent& event)
 {
+	if (stdAccount.getRole() == "user") {
+		ClearTransationsHistory();
+		menuPanel->Hide();
+	}
+	if (stdAccount.getRole() == "admin") {
+		adminMenuPanel->Hide();
+		ClearUsersHistory();
+	}
 	stdAccount.setBalance(0);
 	stdAccount.setLogin("");
 	stdAccount.setPassword("");
 	stdAccount.setId(0);
 	stdAccount.setRole("");
-	ClearHistory();
-	menuPanel->Hide();
 	homePanel->Show();
 }
+
 // ACCOUNT_MANAGEMENT____END
 
 
