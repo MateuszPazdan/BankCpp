@@ -15,7 +15,6 @@ MainFrame::MainFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title)
 	BindLoginEventHandlers();
 	BindRegisterEventHandlers();
 	BindMenuEventHandlers();
-	BindAtmEventHandlers();
 }
 
 void MainFrame::CreateControls()
@@ -26,7 +25,7 @@ void MainFrame::CreateControls()
 	//START PANEL
 	homePanel = new wxPanel(this, wxID_ANY, wxPoint(0, 0), wxSize(800, 600));
 	homePanel->SetFont(mainFont);
-	headlineText = new wxStaticText(homePanel, wxID_ANY, "Bank PRZ", wxPoint(0, 22), wxSize(800, -1), wxALIGN_CENTER_HORIZONTAL);
+	headlineText = new wxStaticText(homePanel, wxID_ANY, "Bank", wxPoint(0, 22), wxSize(800, -1), wxALIGN_CENTER_HORIZONTAL);
 	headlineText->SetFont(headlineFont);
 	
 	chooseLoginBtn = new wxButton(homePanel, wxID_ANY, "Logowanie", wxPoint(300,200), wxSize(200,70));
@@ -73,7 +72,6 @@ void MainFrame::CreateControls()
 	headlineMenuText->SetFont(headlineFont);
 
 	logoutBtn = new wxButton(menuPanel, wxID_ANY, "Wyloguj", wxPoint(10, 10), wxSize(80, -1));
-	atmBtn = new wxButton(menuPanel, wxID_ANY, "ATM", wxPoint(100, 10), wxSize(80, -1));
 	moneyBalance = new wxStaticText(menuPanel, wxID_ANY, "0", wxPoint(0, 100), wxSize(800, -1), wxALIGN_CENTER_HORIZONTAL);
 	depositBtn = new wxButton(menuPanel, wxID_ANY, "Wp³aæ", wxPoint(175, 150), wxSize(150, 50));
 	withdrawBtn = new wxButton(menuPanel, wxID_ANY, "Wyp³aæ", wxPoint(475, 150), wxSize(150, 50));
@@ -91,33 +89,16 @@ void MainFrame::CreateControls()
 	backBtn = new wxButton(menuPanel, wxID_ANY, "<", wxPoint(100, 160), wxSize(50, -1));
 	backBtn->Hide();
 
-	//ATM PANEL
-	atmPanel = new wxPanel(this, wxID_ANY, wxPoint(0, 0), wxSize(800, 600));
-	amountOfBillsBtn = new wxButton(atmPanel, wxID_ANY, "Ile banknotow", wxPoint(10, 10), wxSize(150, 50));
-
-	fhInfo = new wxStaticText(atmPanel, wxID_ANY, "500z³", wxPoint(295, 103), wxSize(26, -1));
-	thInfo = new wxStaticText(atmPanel, wxID_ANY, "200z³", wxPoint(295, 133), wxSize(26, -1));
-	ohInfo = new wxStaticText(atmPanel, wxID_ANY, "100z³", wxPoint(295, 163), wxSize(26, -1));
-	fInfo = new wxStaticText(atmPanel, wxID_ANY, "50z³", wxPoint(295, 193), wxSize(26, -1));
-	twhInfo = new wxStaticText(atmPanel, wxID_ANY, "20z³", wxPoint(295, 223), wxSize(26, -1));
-	teInfo = new wxStaticText(atmPanel, wxID_ANY, "10z³", wxPoint(295, 253), wxSize(26, -1));
-	fhAtm = new wxTextCtrl(atmPanel, wxID_ANY, "0", wxPoint(325, 100), wxSize(150, -1));
-	thAtm = new wxTextCtrl(atmPanel, wxID_ANY, "0", wxPoint(325, 130), wxSize(150, -1));
-	ohAtm = new wxTextCtrl(atmPanel, wxID_ANY, "0", wxPoint(325, 160), wxSize(150, -1));
-	fAtm = new wxTextCtrl(atmPanel, wxID_ANY, "0", wxPoint(325, 190), wxSize(150, -1));
-	twAtm = new wxTextCtrl(atmPanel, wxID_ANY, "0", wxPoint(325, 220), wxSize(150, -1));
-	teAtm = new wxTextCtrl(atmPanel, wxID_ANY, "0", wxPoint(325, 250), wxSize(150, -1));
-	atmDepositBtn = new wxButton(atmPanel, wxID_ANY, "Wp³aæ", wxPoint(325, 280), wxSize(150, -1));
-
-	AmountWindowAtm = new wxTextCtrl(atmPanel, wxID_ANY, "0", wxPoint(325, 350), wxSize(150, -1));
-	atmWithdrawBtn = new wxButton(atmPanel, wxID_ANY, "Wyp³aæ", wxPoint(325, 380), wxSize(150, -1));
-	atmBackBtn = new wxButton(atmPanel, wxID_ANY, "Wróæ", wxPoint(50, 500), wxSize(100, 50));
+	//ADMIN PANEL
+	adminMenuPanel = new wxPanel(this, wxID_ANY, wxPoint(0, 0), wxSize(800, 600));
+	adminLogoutBtn = new wxButton(adminMenuPanel, wxID_ANY, "Wyloguj", wxPoint(10, 10), wxSize(80, -1));
 
 	//homePanel->Hide();
 	loginPanel->Hide();
 	registerPanel->Hide();
 	menuPanel->Hide();
-	atmPanel->Hide();
+	adminMenuPanel->Hide();
+
 }
 
 // BINDS
@@ -148,146 +129,7 @@ void MainFrame::BindMenuEventHandlers()
 	withdrawAcceptBtn->Bind(wxEVT_BUTTON, &MainFrame::withdrawMoney, this);
 }
 
-void MainFrame::BindAtmEventHandlers()
-{
-	amountOfBillsBtn->Bind(wxEVT_BUTTON, &MainFrame::AtmReport, this);
-	atmBtn->Bind(wxEVT_BUTTON, &MainFrame::AtmOpen, this);
-	atmBackBtn->Bind(wxEVT_BUTTON, &MainFrame::AtmClose, this);
-	atmWithdrawBtn->Bind(wxEVT_BUTTON, &MainFrame::withdrawAtm, this);
-	atmDepositBtn->Bind(wxEVT_BUTTON, &MainFrame::depositAtm, this);
-}
 // BINDS____END
-
-
-///ATM
-void MainFrame::AtmClose(wxCommandEvent& event) {
-	menuPanel->Show();
-	atmPanel->Hide();
-	ClearAtmInputs();
-}
-
-void MainFrame::AtmOpen(wxCommandEvent& event) {
-	menuPanel->Hide();
-	atmPanel->Show();
-}
-
-void MainFrame::ClearAtmInputs()
-{
-	AmountWindowAtm->SetValue("0");
-	AmountWindow->SetValue("0");
-	fhAtm->SetValue("0");
-	thAtm->SetValue("0");
-	ohAtm->SetValue("0");
-	fAtm->SetValue("0");
-	twAtm->SetValue("0");
-	teAtm->SetValue("0");
-}
-
-void MainFrame::AtmReport(wxCommandEvent& event)
-{
-	std::unordered_map<int, int> dostepneBanknoty = atm.getAvailableBills();
-	wxString message;
-	message += "Dostêpne banknoty w bankomacie:\n";
-	for (const auto& para : dostepneBanknoty) {
-		message += wxString::Format("%d z³ - %d\n", para.first, para.second);
-	}
-	wxMessageDialog dialog(this, message, "Dostêpne Banknoty", wxOK | wxICON_INFORMATION);
-	dialog.ShowModal();
-}
-
-bool MainFrame::isCurrencyAtm(const std::string& input) {
-	std::regex pattern("^[1-9]+0+$");
-	return std::regex_match(input, pattern);
-}
-
-void MainFrame::withdrawAtm(wxCommandEvent& event)
-{
-	wxString amountToWithdrawStr = AmountWindowAtm->GetValue();
-	
-	
-	int amountToWithdraw;
-	if (amountToWithdrawStr.ToInt(&amountToWithdraw)) {
-		ClearAtmInputs();
-		if (amountToWithdraw <= 0) {
-			wxMessageBox("Wyp³ata nie mo¿e byæ ujemna i równa 0.", "B³¹d");
-			return;
-		}
-		if (!MainFrame::isCurrencyAtm(std::to_string(amountToWithdraw))) {
-			wxMessageBox("Podaj poprawn¹ kwotê. Bankomat wydaje tylko nomina³y: [ 500,200,100,50,20,10 ]","B³¹d");
-			return;
-		}
-	}
-	else {
-		wxMessageBox("Podaj poprawn¹ wartoœæ wyp³aty.");
-		ClearAtmInputs();
-		return;
-	}
-
-	if (stdAccount.getBalance() - amountToWithdraw < 0) {
-		wxMessageBox("Za ma³o œrodków na koncie");
-		ClearAtmInputs();
-		return;
-	}
-
-	std::unordered_map<int, int> result = atm.withdrawCash(amountToWithdraw);
-	if (!result.empty()) {
-		wxString message;
-		message += "Wyp³acone banknoty:\n";
-		for (const auto& para : result) {
-			message += wxString::Format("%d z³ - %d\n", para.first, para.second);
-		}
-		wxMessageDialog dialog(this, message, "Wyp³acono Banknoty", wxOK | wxICON_INFORMATION);
-		dialog.ShowModal();
-		ClearAtmInputs();
-	}
-	else {
-		wxMessageBox("Zbyt ma³o bankotów w bankomacie", "B³¹d");
-		ClearAtmInputs();
-		return;
-	}
-	double updatedBalance = stdAccount.getBalance() - amountToWithdraw;
-	wxString updatedBalanceStr = wxString::Format(wxT("%.2f"), updatedBalance);
-	stdAccount.updateBalance(updatedBalance);
-	moneyBalance->SetLabel(updatedBalanceStr);
-	stdAccount.writeTransactionToFile("wyplata", amountToWithdraw);
-	ClearDepWitInputs();
-	ClearHistory();
-	ShowHisory();
-}
-
-void MainFrame::depositAtm(wxCommandEvent& event) {
-	std::unordered_map<int, int> depositedBills;
-	int tempSum = 0;
-	depositedBills[10] = wxAtoi(teAtm->GetValue());
-	depositedBills[20] = wxAtoi(twAtm->GetValue());
-	depositedBills[50] = wxAtoi(fAtm->GetValue());
-	depositedBills[100] = wxAtoi(ohAtm->GetValue());
-	depositedBills[200] = wxAtoi(thAtm->GetValue());
-	depositedBills[500] = wxAtoi(fhAtm->GetValue());
-	ClearAtmInputs();
-	for (const auto& pair : depositedBills) {
-		tempSum += pair.first* pair.second;
-	}
-	double updatedBalance = stdAccount.getBalance() + tempSum;
-	if (stdAccount.updateBalance(updatedBalance)) {
-		wxMessageBox("Wp³acono");
-	}
-	else {
-		wxMessageBox("B³¹d");
-		return;
-	}
-	wxString updatedBalanceStr = wxString::Format(wxT("%.2f"), updatedBalance);
-	moneyBalance->SetLabel(updatedBalanceStr);
-	stdAccount.writeTransactionToFile("wplata", tempSum);
-	ClearDepWitInputs();
-	HideDepWitMenu(event);
-	ClearHistory();
-	ShowHisory();
-	
-	atm.depositCash(depositedBills);
-}
-
-/// ATM____END
 
 
 // ACCOUNT_MANAGEMENT
@@ -309,7 +151,6 @@ void MainFrame::ShowHomePanel(wxCommandEvent& event)
 	ClearInputs();
 	loginPanel->Hide();
 	registerPanel->Hide();
-	atmPanel->Hide();
 }
 
 void MainFrame::ShowDepositMenu(wxCommandEvent& event)
@@ -355,7 +196,7 @@ void MainFrame::ClearDepWitInputs()
 	AmountWindow->SetValue("0");
 }
 
-void MainFrame::ShowHisory()
+void MainFrame::ShowTransactionsHisory()
 {
 	std::vector<Transaction> transactions = stdAccount.returnVectorOfTransactions();
 	for (int i = transactions.size() - 1; i >= 0; i--) {
@@ -440,13 +281,17 @@ void MainFrame::loginAccount(wxCommandEvent& event)
 
 
 	if (stdAccount.returnAccount(loginStr, passwordStr)) {
-		stdAccount.setLogin(loginStr);
-		stdAccount.setPassword(passwordStr);
-		moneyBalance->SetLabel(wxString::Format(wxT("%.2f"), stdAccount.getBalance()));
-		headlineMenuText->SetLabel(greeting);
-		ShowHisory();
-		loginPanel->Hide();
-		menuPanel->Show();
+		
+		if(stdAccount.getRole() == "user") {
+			moneyBalance->SetLabel(wxString::Format(wxT("%.2f"), stdAccount.getBalance()));
+			headlineMenuText->SetLabel(greeting);
+			ShowTransactionsHisory();
+			loginPanel->Hide();
+			menuPanel->Show();
+		}
+		if (stdAccount.getRole() == "admin") {
+
+		}
 	}
 	else {
 		wxMessageBox("Nieprawid³owe dane");
@@ -472,7 +317,7 @@ void MainFrame::depositMoney(wxCommandEvent& event)
 		return;
 	}
 	double updatedBalance = stdAccount.getBalance() + amountToDeposit;
-	if (stdAccount.updateBalance(updatedBalance)) {
+	if (stdAccount.updateBalance(updatedBalance) && stdAccount.writeTransactionToDB("wplata", amountToDeposit)) {
 		wxMessageBox("Wp³acono");
 	}
 	else {
@@ -481,11 +326,10 @@ void MainFrame::depositMoney(wxCommandEvent& event)
 	}
 	wxString updatedBalanceStr = wxString::Format(wxT("%.2f"), updatedBalance); 
 	moneyBalance->SetLabel(updatedBalanceStr);
-	stdAccount.writeTransactionToFile("wplata", amountToDeposit);
 	ClearDepWitInputs();
 	HideDepWitMenu(event);
 	ClearHistory();
-	ShowHisory();
+	ShowTransactionsHisory();
 }
 
 void MainFrame::withdrawMoney(wxCommandEvent& event)
@@ -511,7 +355,7 @@ void MainFrame::withdrawMoney(wxCommandEvent& event)
 		return;
 	}
 	double updatedBalance = stdAccount.getBalance() - amountToWithdraw;
-	if (stdAccount.updateBalance(updatedBalance)) {
+	if (stdAccount.updateBalance(updatedBalance) && stdAccount.writeTransactionToDB("wyplata", amountToWithdraw)) {
 		wxMessageBox("Wyp³acono");
 	}
 	else {
@@ -521,11 +365,11 @@ void MainFrame::withdrawMoney(wxCommandEvent& event)
 	
 	wxString updatedBalanceStr = wxString::Format(wxT("%.2f"), updatedBalance);
 	moneyBalance->SetLabel(updatedBalanceStr);
-	stdAccount.writeTransactionToFile("wyplata", amountToWithdraw);
+	
 	ClearDepWitInputs();
 	HideDepWitMenu(event);
 	ClearHistory();
-	ShowHisory();
+	ShowTransactionsHisory();
 }
 
 void MainFrame::logout(wxCommandEvent& event)
@@ -533,6 +377,8 @@ void MainFrame::logout(wxCommandEvent& event)
 	stdAccount.setBalance(0);
 	stdAccount.setLogin("");
 	stdAccount.setPassword("");
+	stdAccount.setId(0);
+	stdAccount.setRole("");
 	ClearHistory();
 	menuPanel->Hide();
 	homePanel->Show();

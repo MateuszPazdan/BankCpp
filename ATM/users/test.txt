@@ -1,4 +1,0 @@
-319.500000
-wplata 321
-wplata 1
-wyplata 2.5

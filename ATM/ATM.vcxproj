@@ -24,6 +24,7 @@
     <ProjectGuid>{a9b4c685-afd9-4c4b-a8db-21a81ac8532e}</ProjectGuid>
     <RootNamespace>ATM</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>Bank</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -131,16 +132,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\sqlite\sqlite3.h" />
+    <ClInclude Include="..\sqlite\sqlite3ext.h" />
     <ClInclude Include="Account.h" />
     <ClInclude Include="App.h" />
-    <ClInclude Include="Atm.h" />
     <ClInclude Include="MainFrame.h" />
     <ClInclude Include="Transaction.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\sqlite\shell.c" />
+    <ClCompile Include="..\sqlite\sqlite3.c" />
     <ClCompile Include="Account.cpp" />
     <ClCompile Include="App.cpp" />
-    <ClCompile Include="Atm.cpp" />
     <ClCompile Include="MainFrame.cpp" />
     <ClCompile Include="Transaction.cpp" />
   </ItemGroup>

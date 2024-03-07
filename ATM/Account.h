@@ -3,26 +3,33 @@
 #include <vector>
 #include "Transaction.h"
 
+
 class Account {
     private:
+        int id;
         std::string login;
         std::string password;
         double balance;
+        std::string role;
     public:
-        Account(std::string& login, double initialBalance,  std::string& password);
+        Account(std::string& login, double initialBalance, std::string& password);
+        Account(int id, std::string& login, double initialBalance, std::string& password, std::string& role);
 
-        std::vector<Account> returnVectorOfAccounts();
-        void writeAccountToFile();
-        bool returnAccount(std::string login, std::string password);
         bool createAccount();
-        bool updateBalance(double newBalance);
+        std::vector<Account> returnVectorOfAccounts();
+        bool returnAccount(std::string login, std::string password);
         std::vector<Transaction> returnVectorOfTransactions();
-        bool writeTransactionToFile(std::string type, double amount);
+        bool updateBalance(double newBalance);
+        bool writeTransactionToDB(std::string type, double amount);
 
+        int getId();
         std::string getLogin();
         std::string getPassword();
         double getBalance();
+        std::string getRole();
+        void setId(int id);
         void setLogin(std::string login);
         void setPassword(std::string password);
         void setBalance(double balance);
+        void setRole(std::string role);
 };
