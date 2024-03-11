@@ -137,8 +137,39 @@ std::vector<Transaction> Account::returnVectorOfTransactions()
 bool Account::writeTransactionToDB(std::string type, double amount)
 {
 	Transaction transaction;
-	if (transaction.makeNewTransaction(this->login, amount, "wplata")) return true;
+	if (transaction.makeNewTransaction(this->login, amount, type)) return true;
 	return false;
+}
+
+bool Account::deleteAccount(std::string login)
+{
+	Transaction transaction;
+	transaction.deleteUserTransactions(login);
+	sqlite3* db;
+	sqlite3_stmt* stmt;
+	if (sqlite3_open("bankDB.db", &db) != SQLITE_OK) {
+		return false;
+	}
+
+	const char* query = "DELETE FROM accounts WHERE name = ?";
+	int rc = sqlite3_prepare_v2(db, query, -1, &stmt, nullptr);
+	if (rc != SQLITE_OK) {
+		sqlite3_close(db);
+		return false;
+	}
+
+	sqlite3_bind_text(stmt, 1, login.c_str(), -1, SQLITE_STATIC);
+	rc = sqlite3_step(stmt);
+	if (rc != SQLITE_DONE) {
+		sqlite3_finalize(stmt);
+		sqlite3_close(db);
+		return false;
+	}
+
+	sqlite3_finalize(stmt);
+	sqlite3_close(db);
+
+	return true;
 }
 
 

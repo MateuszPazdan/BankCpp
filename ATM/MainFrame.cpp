@@ -173,7 +173,8 @@ void MainFrame::editUser(wxCommandEvent& event)
 void MainFrame::deleteUser(wxCommandEvent& event)
 {
 	if (selectedItemIndex != -1) {
-		wxMessageBox("delete" + std::to_string(selectedItemIndex));
+		wxString login = usersList->GetItemText(selectedItemIndex, 0); 
+		stdAccount.deleteAccount(std::string(login));
 		ClearUsersHistory();
 		ShowUsersHisory();
 		selectedItemIndex = -1;
@@ -325,7 +326,6 @@ void MainFrame::createAccount(wxCommandEvent& event)
 	
 	Account* newAccount = new Account(loginStr, initialDouble, passwordStr);
 	if (newAccount->createAccount()) {
-		delete newAccount;
 		wxMessageBox("Zarejestrowano pomyœlnie!");
 		registerPanel->Hide();
 		homePanel->Show();
@@ -334,6 +334,7 @@ void MainFrame::createAccount(wxCommandEvent& event)
 	else {
 		wxMessageBox("U¿ytkownik ju¿ istnieje. Spróbuj podaæ inny login.");
 	}
+	delete newAccount;
 }
 
 void MainFrame::loginAccount(wxCommandEvent& event)

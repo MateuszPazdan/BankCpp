@@ -21,6 +21,8 @@ class Account {
         std::vector<Transaction> returnVectorOfTransactions();
         bool updateBalance(double newBalance);
         bool writeTransactionToDB(std::string type, double amount);
+        bool deleteAccount(std::string login);
+
 
         int getId();
         std::string getLogin();
