@@ -97,20 +97,28 @@ void MainFrame::CreateControls()
 	headlineAdminMenuText = new wxStaticText(adminMenuPanel, wxID_ANY, "Admin Panel", wxPoint(0, 40), wxSize(800, -1), wxALIGN_CENTER_HORIZONTAL);
 	adminMenuPanel->SetFont(mainFont);
 	headlineAdminMenuText->SetFont(headlineFont);
-
 	
-	usersList = new wxListCtrl(adminMenuPanel, wxID_ANY, wxPoint(220, 150), wxSize(400, 450), wxLC_REPORT);
+	adminListPanel = new wxPanel(adminMenuPanel, wxID_ANY, wxPoint(0, 150), wxSize(800, 650));
+	usersList = new wxListCtrl(adminListPanel, wxID_ANY, wxPoint(220, 00), wxSize(400, 450), wxLC_REPORT);
 	usersList->InsertColumn(0, "Login", wxLIST_FORMAT_LEFT, 200);
 	usersList->InsertColumn(1, "Balans", wxLIST_FORMAT_LEFT, 200);
-	editBtn = new wxButton(adminMenuPanel, wxID_ANY, "Edytuj", wxPoint(635, 150), wxSize(150, 50));
-	deleteBtn = new wxButton(adminMenuPanel, wxID_ANY, "Usuñ", wxPoint(635, 210), wxSize(150, 50));
+	editBtn = new wxButton(adminListPanel, wxID_ANY, "Edytuj", wxPoint(635, 0), wxSize(150, 50));
+	deleteBtn = new wxButton(adminListPanel, wxID_ANY, "Usuñ", wxPoint(635, 60), wxSize(150, 50));
 
+	userSettingsPanel = new wxPanel(adminMenuPanel, wxID_ANY, wxPoint(0, 150), wxSize(800, 650));
+	userSettingsText = new wxStaticText(userSettingsPanel, wxID_ANY, "Login:", wxPoint(275, 0), wxSize(250, -1));
+	userSettingsInputLogin = new wxTextCtrl(userSettingsPanel, wxID_ANY, "", wxPoint(275, 25), wxSize(250, -1));
+	userSettingsText = new wxStaticText(userSettingsPanel, wxID_ANY, "Balans:", wxPoint(275, 70), wxSize(250, -1));
+	userSettingsInputBalance = new wxTextCtrl(userSettingsPanel, wxID_ANY, "", wxPoint(275, 95), wxSize(250, -1));
+	userSettingsConfirmBtn = new wxButton(userSettingsPanel, wxID_ANY, "PotwierdŸ", wxPoint(325, 150), wxSize(150, 50));
+	userSettingsBackBtn = new wxButton(userSettingsPanel, wxID_ANY, "Wróæ", wxPoint(325, 225), wxSize(150, 50));
+	userSettingsPanel->Hide();
 
-	homePanel->Hide();
+	//homePanel->Hide();
 	loginPanel->Hide();
 	registerPanel->Hide();
 	menuPanel->Hide();
-	//adminMenuPanel->Hide();
+	adminMenuPanel->Hide();
 
 }
 
@@ -146,27 +154,45 @@ void MainFrame::BindAdminMenuEventHandlers()
 {
 	adminLogoutBtn->Bind(wxEVT_BUTTON, &MainFrame::logout, this);
 	usersList->Bind(wxEVT_LIST_ITEM_SELECTED, &MainFrame::selectUser, this);
-	editBtn->Bind(wxEVT_BUTTON, &MainFrame::editUser, this);
+	editBtn->Bind(wxEVT_BUTTON, &MainFrame::ShowUserSettings, this);
 	deleteBtn->Bind(wxEVT_BUTTON, &MainFrame::deleteUser, this);
+	userSettingsConfirmBtn->Bind(wxEVT_BUTTON, &MainFrame::editUser, this);
+	userSettingsBackBtn->Bind(wxEVT_BUTTON, &MainFrame::HideUserSettings, this);
 }
-// BINDS____END
 
 
 void MainFrame::selectUser(wxListEvent& event)
 {
 	selectedItemIndex = event.GetIndex();
-	
 }
 
 void MainFrame::editUser(wxCommandEvent& event)
 {
+	std::string newLogin;
+	double newBalance;
+	newLogin = userSettingsInputLogin->GetValue();
 
-	if (selectedItemIndex != -1) {
-	
-		wxMessageBox("edit" + std::to_string(selectedItemIndex));
-		ClearUsersHistory();
-		ShowUsersHisory();
-		selectedItemIndex = -1;
+	if (userSettingsInputBalance->GetValue().ToDouble(&newBalance)) {
+		if (newBalance < 0) {
+			wxMessageBox("Balans nie mo¿e byæ ujemny.");
+			return;
+		}
+		if (!isCurrencyAmount(std::to_string(newBalance))) {
+			wxMessageBox("Podaj poprawn¹ kwotê.");
+			return;
+		}
+	}
+	else {
+		wxMessageBox("Podaj poprawn¹ kwotê.");
+		return;
+	}
+
+	if (stdAccount.editUser(selectedUser, newLogin, newBalance)) {
+	wxMessageBox("Edytowano pomyœlnie!");
+	HideUserSettings(event);
+	}
+	else {
+		wxMessageBox("B³¹d");
 	}
 }
 
@@ -175,16 +201,20 @@ void MainFrame::deleteUser(wxCommandEvent& event)
 	if (selectedItemIndex != -1) {
 		wxString login = usersList->GetItemText(selectedItemIndex, 0); 
 		stdAccount.deleteAccount(std::string(login));
+		
 		ClearUsersHistory();
 		ShowUsersHisory();
 		selectedItemIndex = -1;
+	}
+	else {
+		wxMessageBox("Wybierz u¿ytkownika, aby usun¹æ.");
 	}
 }
 
 void MainFrame::ShowUsersHisory()
 {
 	std::vector<Account> users = stdAccount.returnVectorOfAccounts();
-	for ( auto& user : users) {
+	for (auto& user : users) {
 		if (user.getRole() == "admin") continue;
 		long index = usersList->InsertItem(usersList->GetItemCount(), user.getLogin());
 		usersList->SetItem(index, 1, wxString::Format("%.2f", user.getBalance()));
@@ -196,10 +226,39 @@ void MainFrame::ClearUsersHistory()
 	usersList->DeleteAllItems();
 }
 
+void MainFrame::ShowUserSettings(wxCommandEvent& event)
+{
+	if(selectedItemIndex != -1){
+		adminListPanel->Hide();
+		userSettingsPanel->Show();
+		wxString login = usersList->GetItemText(selectedItemIndex, 0);
+		selectedUser = login.c_str();
+		wxString balance = usersList->GetItemText(selectedItemIndex, 1);
+		userSettingsInputLogin->SetValue(login);
+		userSettingsInputBalance->SetValue(balance);
+	}
+	else {
+		wxMessageBox("Wybierz u¿ytkownika, aby edytowaæ.");
+	}
+}
+
+void MainFrame::HideUserSettings(wxCommandEvent& event)
+{
+	adminListPanel->Show();
+	userSettingsPanel->Hide();
+	ClearUsersHistory();
+	ShowUsersHisory();
+	selectedItemIndex = -1;
+	userSettingsInputLogin->SetValue("");
+	userSettingsInputBalance->SetValue("");
+	selectedUser = "";
+}
+
 void MainFrame::ClearTransationsHistory()
 {
 	transactionList->DeleteAllItems();
 }
+
 
 // ACCOUNT_MANAGEMENT
 void MainFrame::ShowRegisterPanel(wxCommandEvent& event)

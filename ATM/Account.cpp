@@ -172,6 +172,35 @@ bool Account::deleteAccount(std::string login)
 	return true;
 }
 
+bool Account::editUser(std::string login, std::string newLogin, double newBalance)
+{
+	char* err;
+	sqlite3* db;
+	sqlite3_open("bankDB.db", &db);
+
+	// Aktualizujemy dane u¿ytkownika w tabeli accounts
+	std::string query = "UPDATE accounts SET name = '" + newLogin + "', balance = " + std::to_string(newBalance) + " WHERE name = '" + login + "'";
+	int rc = sqlite3_exec(db, query.c_str(), NULL, NULL, &err);
+	if (rc != SQLITE_OK) {
+		// W przypadku b³êdu zwracamy false
+		return false;
+	}
+
+	// Aktualizujemy tak¿e dane u¿ytkownika w tabeli transactions
+	query = "UPDATE transactions SET user_id = (SELECT id FROM accounts WHERE name = '" + newLogin + "') WHERE user_id = (SELECT id FROM accounts WHERE name = '" + login + "')";
+	rc = sqlite3_exec(db, query.c_str(), NULL, NULL, &err);
+	if (rc != SQLITE_OK) {
+		// W przypadku b³êdu zwracamy false
+		return false;
+	}
+
+	// Zamykamy po³¹czenie z baz¹ danych
+	sqlite3_close(db);
+
+	// Zwracamy true, jeœli operacja zakoñczy³a siê sukcesem
+	return true;
+}
+
 
 bool Account::updateBalance(double newBalance)
 {

@@ -12,10 +12,8 @@ public:
 	Transaction(std::string& type, double amount);
 
 	bool makeNewTransaction(const std::string login, const double amount, const std::string type);
-	std::string deleteUserTransactions(const std::string login);
+	bool deleteUserTransactions(const std::string login);
 	
 	std::string getType();
 	double getAmount();
-
 };
-

@@ -13,6 +13,7 @@ private:
 	std::string stdLogin = "";
 	std::string stdPassword = "";
 	int selectedItemIndex = -1;
+	std::string selectedUser = "";
 	Account stdAccount = Account(stdLogin, 0.0, stdPassword);
 
 	// BINDS
@@ -47,6 +48,8 @@ private:
 
 	void ShowUsersHisory();
 	void ClearUsersHistory();
+	void ShowUserSettings(wxCommandEvent& event);
+	void HideUserSettings(wxCommandEvent& event);
 
 	wxStaticText* headlineText;
 	
@@ -93,7 +96,16 @@ private:
 	wxStaticText* headlineAdminMenuText;
 	wxButton* adminLogoutBtn;
 
+	wxPanel* adminListPanel;
 	wxListCtrl* usersList;
 	wxButton* deleteBtn;
 	wxButton* editBtn;
+
+	wxPanel* userSettingsPanel;
+	wxStaticText* userSettingsText;
+	wxTextCtrl* userSettingsInputLogin;
+	wxTextCtrl* userSettingsInputBalance;
+	wxButton* userSettingsConfirmBtn;
+	wxButton* userSettingsBackBtn;
+	
 };

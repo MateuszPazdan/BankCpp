@@ -1,6 +1,5 @@
 #include "Transaction.h"
 
-
 Transaction::Transaction(std::string& type, double amount)
 {
 	this->type = type;
@@ -9,30 +8,29 @@ Transaction::Transaction(std::string& type, double amount)
 
 bool Transaction::makeNewTransaction(std::string login, double amount, std::string type)
 {
-    char* err;
+  
     sqlite3* db;
     sqlite3_open("bankDB.db", &db);
 
     std::string query = "CREATE TABLE IF NOT EXISTS transactions (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, type TEXT, amount FLOAT);";
-
-    int rc = sqlite3_exec(db, query.c_str(), NULL, NULL, &err);
+    int rc = sqlite3_exec(db, query.c_str(), NULL, NULL, NULL);
     if (rc != SQLITE_OK) {
         return false;
     }
 
     if (amount != 0) {
         query = "INSERT INTO transactions (user_id, type, amount) VALUES ((SELECT id FROM accounts WHERE name = '" + login + "'), '" + type + "', " + std::to_string(amount) + ")";
-        int rc = sqlite3_exec(db, query.c_str(), NULL, NULL, &err);
+        int rc = sqlite3_exec(db, query.c_str(), NULL, NULL, NULL);
         if (rc != SQLITE_OK) {
             return false;
         }
     }
+
     return true;
 }
 
-std::string Transaction::deleteUserTransactions(const std::string login)
+bool Transaction::deleteUserTransactions(const std::string login)
 {
-    char* err;
     sqlite3* db;
     sqlite3_open("bankDB.db", &db);
 
@@ -40,15 +38,15 @@ std::string Transaction::deleteUserTransactions(const std::string login)
     std::string query = "DELETE FROM transactions WHERE user_id = (SELECT id FROM accounts WHERE name = '" + login + "')";
 
     // Wykonujemy zapytanie
-    int rc = sqlite3_exec(db, query.c_str(), NULL, NULL, &err);
+    int rc = sqlite3_exec(db, query.c_str(), NULL, NULL, NULL);
     if (rc != SQLITE_OK) {
-        return err;
+        return false;
     }
 
     // Zamykamy po³¹czenie z baz¹ danych
     sqlite3_close(db);
 
-    return login;
+    return true;
 }
 
 

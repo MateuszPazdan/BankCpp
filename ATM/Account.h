@@ -22,6 +22,7 @@ class Account {
         bool updateBalance(double newBalance);
         bool writeTransactionToDB(std::string type, double amount);
         bool deleteAccount(std::string login);
+        bool editUser(std::string login, std::string newLogin, double newBalance);
 
 
         int getId();
