@@ -1,9 +1,14 @@
 #pragma once
-#include "Account.h"	
-#include <wx/wx.h>
-#include <wx/listctrl.h>
 #include <string>
 #include <unordered_map>
+#include <vector>
+#include <fstream>
+#include <regex>
+#include "Account.h"	
+#include "Transaction.h"
+#include <wx/wx.h>
+#include <wx/listctrl.h>
+
 
 class MainFrame : public wxFrame
 {
@@ -46,8 +51,8 @@ private:
 	void editUser(wxCommandEvent& event);
 	void deleteUser(wxCommandEvent& event);
 
-	void ShowUsersHisory();
-	void ClearUsersHistory();
+	void ShowUsersList();
+	void ClearUsersList();
 	void ShowUserSettings(wxCommandEvent& event);
 	void HideUserSettings(wxCommandEvent& event);
 

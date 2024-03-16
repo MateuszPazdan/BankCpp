@@ -140,7 +140,6 @@
     <ClInclude Include="Transaction.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\sqlite\shell.c" />
     <ClCompile Include="..\sqlite\sqlite3.c" />
     <ClCompile Include="Account.cpp" />
     <ClCompile Include="App.cpp" />

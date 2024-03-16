@@ -1,8 +1,12 @@
 #pragma once
 #include <string>
 #include <vector>
+#include <fstream>
+#include <iostream>
+#include <stdexcept>
+#include <filesystem>
 #include "Transaction.h"
-
+#include "sqlite/sqlite3.h"
 
 class Account {
     private:

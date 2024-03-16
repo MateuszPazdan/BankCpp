@@ -5,8 +5,6 @@
 #include <fstream>
 #include <regex>
 #include "MainFrame.h"
-#include "Account.h"
-#include "Transaction.h"
 
 
 MainFrame::MainFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title)
@@ -19,6 +17,7 @@ MainFrame::MainFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title)
 	BindAdminMenuEventHandlers();
 }
 
+// Tworzenie kontrolek i ustawianie ich w³aœciwoœci
 void MainFrame::CreateControls()
 {
 	wxFont headlineFont(wxFontInfo(wxSize(0, 36)).Bold());
@@ -122,7 +121,7 @@ void MainFrame::CreateControls()
 
 }
 
-// BINDS
+// BINDS - Metody do powi¹zywania zdarzeñ z przyciskami
 void MainFrame::BindHomeEventHandlers()
 {
 	chooseRegisterBtn->Bind(wxEVT_BUTTON, &MainFrame::ShowRegisterPanel, this);
@@ -160,12 +159,61 @@ void MainFrame::BindAdminMenuEventHandlers()
 	userSettingsBackBtn->Bind(wxEVT_BUTTON, &MainFrame::HideUserSettings, this);
 }
 
+// Metody obs³ugi zdarzeñ
 
+ // Obs³uga zdarzenia wyboru u¿ytkownika na liœcie
 void MainFrame::selectUser(wxListEvent& event)
 {
 	selectedItemIndex = event.GetIndex();
 }
 
+// Obs³uga przycisku edytowania u¿ytkownika 
+void MainFrame::ShowUserSettings(wxCommandEvent& event)
+{
+	if (selectedItemIndex != -1) {
+		adminListPanel->Hide();
+		userSettingsPanel->Show();
+		wxString login = usersList->GetItemText(selectedItemIndex, 0);
+		selectedUser = login.c_str();
+		wxString balance = usersList->GetItemText(selectedItemIndex, 1);
+		userSettingsInputLogin->SetValue(login);
+		userSettingsInputBalance->SetValue(balance);
+	}
+	else {
+		wxMessageBox("Wybierz u¿ytkownika, aby edytowaæ.");
+	}
+}
+
+// Chowanie ustawieñ u¿ytkownika
+void MainFrame::HideUserSettings(wxCommandEvent& event)
+{
+	adminListPanel->Show();
+	userSettingsPanel->Hide();
+	ClearUsersList();
+	ShowUsersList();
+	selectedItemIndex = -1;
+	userSettingsInputLogin->SetValue("");
+	userSettingsInputBalance->SetValue("");
+	selectedUser = "";
+}
+
+// Obs³uga przycisku usuwanie u¿ytkownika
+void MainFrame::deleteUser(wxCommandEvent& event)
+{
+	if (selectedItemIndex != -1) {
+		wxString login = usersList->GetItemText(selectedItemIndex, 0);
+		stdAccount.deleteAccount(std::string(login));
+
+		ClearUsersList();
+		ShowUsersList();
+		selectedItemIndex = -1;
+	}
+	else {
+		wxMessageBox("Wybierz u¿ytkownika, aby usun¹æ.");
+	}
+}
+
+// Obs³uga przycisku potwierdzaj¹cego edycje u¿ytkownika
 void MainFrame::editUser(wxCommandEvent& event)
 {
 	std::string newLogin;
@@ -196,22 +244,8 @@ void MainFrame::editUser(wxCommandEvent& event)
 	}
 }
 
-void MainFrame::deleteUser(wxCommandEvent& event)
-{
-	if (selectedItemIndex != -1) {
-		wxString login = usersList->GetItemText(selectedItemIndex, 0); 
-		stdAccount.deleteAccount(std::string(login));
-		
-		ClearUsersHistory();
-		ShowUsersHisory();
-		selectedItemIndex = -1;
-	}
-	else {
-		wxMessageBox("Wybierz u¿ytkownika, aby usun¹æ.");
-	}
-}
-
-void MainFrame::ShowUsersHisory()
+// Wyœwietlanie listy u¿ytkowników
+void MainFrame::ShowUsersList()
 {
 	std::vector<Account> users = stdAccount.returnVectorOfAccounts();
 	for (auto& user : users) {
@@ -221,46 +255,34 @@ void MainFrame::ShowUsersHisory()
 	}
 }
 
-void MainFrame::ClearUsersHistory()
+// Czyszczenie listy u¿ytkowników
+void MainFrame::ClearUsersList()
 {
 	usersList->DeleteAllItems();
 }
 
-void MainFrame::ShowUserSettings(wxCommandEvent& event)
+// Wyœwietlanie listy transakcji
+void MainFrame::ShowTransactionsHisory()
 {
-	if(selectedItemIndex != -1){
-		adminListPanel->Hide();
-		userSettingsPanel->Show();
-		wxString login = usersList->GetItemText(selectedItemIndex, 0);
-		selectedUser = login.c_str();
-		wxString balance = usersList->GetItemText(selectedItemIndex, 1);
-		userSettingsInputLogin->SetValue(login);
-		userSettingsInputBalance->SetValue(balance);
-	}
-	else {
-		wxMessageBox("Wybierz u¿ytkownika, aby edytowaæ.");
+	std::vector<Transaction> transactions = stdAccount.returnVectorOfTransactions();
+	for (int i = transactions.size() - 1; i >= 0; i--) {
+		Transaction transaction = transactions[i];
+		wxString type = wxString::Format("%s", transaction.getType().c_str());
+		wxString amount = wxString::Format("%.2f", transaction.getAmount());
+
+		long index = transactionList->InsertItem(transactionList->GetItemCount(), type);
+		transactionList->SetItem(index, 1, amount);
 	}
 }
 
-void MainFrame::HideUserSettings(wxCommandEvent& event)
-{
-	adminListPanel->Show();
-	userSettingsPanel->Hide();
-	ClearUsersHistory();
-	ShowUsersHisory();
-	selectedItemIndex = -1;
-	userSettingsInputLogin->SetValue("");
-	userSettingsInputBalance->SetValue("");
-	selectedUser = "";
-}
-
+// Czyszczenie listy transakcji
 void MainFrame::ClearTransationsHistory()
 {
 	transactionList->DeleteAllItems();
 }
 
 
-// ACCOUNT_MANAGEMENT
+// Zarz¹dzanie panelami
 void MainFrame::ShowRegisterPanel(wxCommandEvent& event)
 {
 	homePanel->Hide();
@@ -324,32 +346,25 @@ void MainFrame::ClearDepWitInputs()
 	AmountWindow->SetValue("0");
 }
 
-void MainFrame::ShowTransactionsHisory()
-{
-	std::vector<Transaction> transactions = stdAccount.returnVectorOfTransactions();
-	for (int i = transactions.size() - 1; i >= 0; i--) {
-		Transaction transaction = transactions[i];
-		wxString type = wxString::Format("%s", transaction.getType().c_str());
-		wxString amount = wxString::Format("%.2f", transaction.getAmount());
 
-		long index = transactionList->InsertItem(transactionList->GetItemCount(), type);
-		transactionList->SetItem(index, 1, amount);
-	}
-}
+// Metody pomocnicze
 
-
-
+// Sprawdzanie poprawnoœci formatu kwoty
 bool MainFrame::isCurrencyAmount(const std::string& input){
 	std::regex pattern(R"(\d+\.\d{2}[0]*)");
 	return std::regex_match(input, pattern);
 }
 
+// Sprawdzanie poprawnoœci formatu loginu i has³a
 bool MainFrame::isLoginPassword(const std::string& input)
 {
 	std::regex pattern("^[^\\s]{3,}$");
 	return std::regex_match(input, pattern);
 }
 
+// Metody obs³ugi kont
+
+// Tworzenie nowego konta
 void MainFrame::createAccount(wxCommandEvent& event)
 {
 	wxString login = registerInputLogin->GetValue();
@@ -396,6 +411,7 @@ void MainFrame::createAccount(wxCommandEvent& event)
 	delete newAccount;
 }
 
+// Logowanie do konta
 void MainFrame::loginAccount(wxCommandEvent& event)
 {
 	wxString login = loginInputLogin->GetValue();
@@ -406,7 +422,6 @@ void MainFrame::loginAccount(wxCommandEvent& event)
 
 
 	if (stdAccount.returnAccount(loginStr, passwordStr)) {
-		
 		if(stdAccount.getRole() == "user") {
 			moneyBalance->SetLabel(wxString::Format(wxT("%.2f"), stdAccount.getBalance()));
 			headlineMenuText->SetLabel(greeting);
@@ -415,17 +430,18 @@ void MainFrame::loginAccount(wxCommandEvent& event)
 			menuPanel->Show();
 		}
 		if (stdAccount.getRole() == "admin") {
-			ShowUsersHisory();
+			ShowUsersList();
 			loginPanel->Hide();
 			adminMenuPanel->Show();
 		}
-
+		ClearInputs();
 	}
 	else {
 		wxMessageBox("Nieprawid³owe dane");
 	}
 }
 
+// Wp³acanie œrodków
 void MainFrame::depositMoney(wxCommandEvent& event)
 {
 	wxString amountToDepositStr = AmountWindow->GetValue();
@@ -460,6 +476,7 @@ void MainFrame::depositMoney(wxCommandEvent& event)
 	ShowTransactionsHisory();
 }
 
+// Wyp³acanie œrodków
 void MainFrame::withdrawMoney(wxCommandEvent& event)
 {
 	wxString amountToWithdrawStr = AmountWindow->GetValue();
@@ -500,6 +517,7 @@ void MainFrame::withdrawMoney(wxCommandEvent& event)
 	ShowTransactionsHisory();
 }
 
+// Wylogowanie u¿ytkownika
 void MainFrame::logout(wxCommandEvent& event)
 {
 	if (stdAccount.getRole() == "user") {
@@ -508,7 +526,7 @@ void MainFrame::logout(wxCommandEvent& event)
 	}
 	if (stdAccount.getRole() == "admin") {
 		adminMenuPanel->Hide();
-		ClearUsersHistory();
+		ClearUsersList();
 	}
 	stdAccount.setBalance(0);
 	stdAccount.setLogin("");
@@ -516,8 +534,5 @@ void MainFrame::logout(wxCommandEvent& event)
 	stdAccount.setId(0);
 	stdAccount.setRole("");
 	homePanel->Show();
+	HideUserSettings(event);
 }
-
-// ACCOUNT_MANAGEMENT____END
-
-
